@@ -7,12 +7,25 @@
 //
 
 import UIKit
+import WebKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, WKNavigationDelegate {
 
+    var webView: WKWebView!
+    
+    override func loadView() {
+        webView = WKWebView()
+        webView.navigationDelegate = self
+        view = webView
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        let url = NSURL(string: "https://google.com")!
+        webView.loadRequest(NSURLRequest(URL: url))
+        webView.allowsBackForwardNavigationGestures = true
+        
     }
 
     override func didReceiveMemoryWarning() {
