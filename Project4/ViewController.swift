@@ -12,6 +12,8 @@ import WebKit
 class ViewController: UIViewController, WKNavigationDelegate {
 
     var webView: WKWebView!
+    var progressView: UIProgressView!
+    var websites = ["apple.com", "bing.com", "google.com"]
     
     override func loadView() {
         webView = WKWebView()
@@ -22,23 +24,34 @@ class ViewController: UIViewController, WKNavigationDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        let url = NSURL(string: "https://apple.com")!
+        let url = NSURL(string: "https://" + websites[0])!
         webView.loadRequest(NSURLRequest(URL: url))
         webView.allowsBackForwardNavigationGestures = true
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "open", style: .Plain, target: self,
                                                             action: #selector(openTapped))
+        
+        progressView = UIProgressView(progressViewStyle: .Default)
+        progressView.sizeToFit()
+        let progressButton = UIBarButtonItem(customView: progressView)
+        
         let spacer = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
         let refresh = UIBarButtonItem(barButtonSystemItem: .Refresh, target: webView, action: #selector(webView.reload))
         
-        toolbarItems = [spacer, refresh]
+        toolbarItems = [progressButton, spacer, refresh]
         navigationController?.toolbarHidden = false
+        
+        webView.addObserver(self, forKeyPath: "estimatedProgress", options: .New, context: nil)
+        
     }
     
     func openTapped() {
         let ac = UIAlertController(title: "open page", message: nil, preferredStyle: .ActionSheet)
-        ac.addAction(UIAlertAction(title: "bing.com", style: .Default, handler: openPage))
-        ac.addAction(UIAlertAction(title: "google.com", style: .Default, handler: openPage))
+        
+        for website in websites {
+            ac.addAction(UIAlertAction(title: website, style: .Default, handler: openPage))
+        }
+        
         ac.addAction(UIAlertAction(title: "cancel", style: .Cancel, handler: nil))
         presentViewController(ac, animated: true, completion: nil)
         
@@ -58,6 +71,14 @@ class ViewController: UIViewController, WKNavigationDelegate {
         // Dispose of any resources that can be recreated.
     }
 
+    override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?,
+                                         context: UnsafeMutablePointer<Void>) {
+        if keyPath == "estimatedProgress" {
+            progressView.progress = Float(webView.estimatedProgress)
+        }
+    }
+    
+    
 
 }
 
