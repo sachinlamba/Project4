@@ -13,7 +13,7 @@ class ViewController: UIViewController, WKNavigationDelegate {
 
     var webView: WKWebView!
     var progressView: UIProgressView!
-    var websites = ["apple.com", "bing.com", "google.com"]
+    var websites = ["apple.com", "google.in", "microsoft.com", "bing.com"]
     
     override func loadView() {
         webView = WKWebView()
@@ -31,7 +31,7 @@ class ViewController: UIViewController, WKNavigationDelegate {
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "open", style: .Plain, target: self,
                                                             action: #selector(openTapped))
         
-        progressView = UIProgressView(progressViewStyle: .Default)
+        progressView = UIProgressView(progressViewStyle: .Bar)
         progressView.sizeToFit()
         let progressButton = UIBarButtonItem(customView: progressView)
         
@@ -78,7 +78,28 @@ class ViewController: UIViewController, WKNavigationDelegate {
         }
     }
     
-    
+    func webView(webView: WKWebView, decidePolicyForNavigationAction navigationAction: WKNavigationAction, decisionHandler: (WKNavigationActionPolicy) -> Void) {
+        let url = navigationAction.request.URL
+        
+        if let host = url!.host {
+            for website in websites {
+                if host.rangeOfString(website) != nil {
+                    decisionHandler(.Allow)
+                    return
+                }
+                
+            }
+        }
+        else {
+            let wp = UIAlertController(title: "Wrong Domain", message: "Limited Domains are allowed", preferredStyle: .Alert)
+            wp.addAction(UIAlertAction(title: "Continue", style: .Default, handler: nil))
+            presentViewController(wp, animated: true, completion: nil)
+            decisionHandler(.Cancel)
+            return
+        }
+        decisionHandler(.Cancel)
+        
+    }
 
 }
 
